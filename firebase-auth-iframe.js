@@ -1,5 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+// Use CDN imports for Firebase libraries
+// Make sure to use specific versions if you have them in your extension's manifest.json or package.json
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js'; // Example CDN version
+import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js'; // Example CDN version
 
 // Configuration Firebase - n8n-vibecoding project
 const firebaseConfig = {
@@ -20,7 +22,6 @@ const googleProvider = new GoogleAuthProvider();
 const PARENT_FRAME_ORIGIN = document.location.ancestorOrigins[0];
 
 function sendAuthResponse(result) {
-  // We need to stringify the result because postMessage might not handle complex objects directly
   globalThis.parent.self.postMessage(JSON.stringify(result), PARENT_FRAME_ORIGIN);
 }
 
@@ -88,13 +89,9 @@ globalThis.addEventListener('message', async (event) => {
   }
 });
 
-// Optionally, you can add a listener to send the current user status back
-// when the iframe loads, if offscreen.js requests it.
 auth.onAuthStateChanged(user => {
   if (user) {
     console.log('User already signed in within iframe:', user.uid);
-    // You might want to proactively send this to the offscreen document
-    // if it's just loaded and checking status.
   } else {
     console.log('No user signed in within iframe.');
   }

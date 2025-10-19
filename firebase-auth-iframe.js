@@ -14,6 +14,8 @@ const firebaseConfig = {
   measurementId: "G-ZYZF76GK5P",
 };
 
+
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
@@ -21,12 +23,21 @@ const googleProvider = new GoogleAuthProvider();
 // This ensures we're communicating with the parent frame only if it's our offscreen document
 const PARENT_FRAME_ORIGIN = document.location.ancestorOrigins[0];
 
+// --- DEBUGGING LOGS ---
+console.log('DEBUG: PARENT_FRAME_ORIGIN is:', PARENT_FRAME_ORIGIN);
+console.log('DEBUG: document.location is:', document.location);
+// --- END DEBUGGING LOGS ---
+
 function sendAuthResponse(result) {
   globalThis.parent.self.postMessage(JSON.stringify(result), PARENT_FRAME_ORIGIN);
 }
 
 // Listen for messages from the offscreen document
 globalThis.addEventListener('message', async (event) => {
+  // --- DEBUGGING LOG ---
+  console.log('DEBUG: Received message from origin:', event.origin);
+  // --- END DEBUGGING LOG ---
+
   // Only process messages from our offscreen document
   if (event.origin !== PARENT_FRAME_ORIGIN) {
     console.warn('Received message from unknown origin:', event.origin);
@@ -58,7 +69,7 @@ globalThis.addEventListener('message', async (event) => {
           email: user.email,
           displayName: user.displayName,
           photoURL: user.photoURL,
-          accessToken: await user.getIdToken(), // Get the ID token
+          accessToken: await user.getIdToken(),
           refreshToken: user.refreshToken
         }
       });

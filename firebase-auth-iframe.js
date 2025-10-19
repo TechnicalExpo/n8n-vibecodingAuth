@@ -1,7 +1,6 @@
 // Use CDN imports for Firebase libraries
-// Make sure to use specific versions if you have them in your extension's manifest.json or package.json
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js'; // Example CDN version
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js'; // Example CDN version
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 
 // Configuration Firebase - n8n-vibecoding project
 const firebaseConfig = {
@@ -14,8 +13,6 @@ const firebaseConfig = {
   measurementId: "G-ZYZF76GK5P",
 };
 
-
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
@@ -23,21 +20,12 @@ const googleProvider = new GoogleAuthProvider();
 // This ensures we're communicating with the parent frame only if it's our offscreen document
 const PARENT_FRAME_ORIGIN = document.location.ancestorOrigins[0];
 
-// --- DEBUGGING LOGS ---
-console.log('DEBUG: PARENT_FRAME_ORIGIN is:', PARENT_FRAME_ORIGIN);
-console.log('DEBUG: document.location is:', document.location);
-// --- END DEBUGGING LOGS ---
-
 function sendAuthResponse(result) {
   globalThis.parent.self.postMessage(JSON.stringify(result), PARENT_FRAME_ORIGIN);
 }
 
 // Listen for messages from the offscreen document
 globalThis.addEventListener('message', async (event) => {
-  // --- DEBUGGING LOG ---
-  console.log('DEBUG: Received message from origin:', event.origin);
-  // --- END DEBUGGING LOG ---
-
   // Only process messages from our offscreen document
   if (event.origin !== PARENT_FRAME_ORIGIN) {
     console.warn('Received message from unknown origin:', event.origin);
@@ -56,8 +44,10 @@ globalThis.addEventListener('message', async (event) => {
     return;
   }
 
-  if (data.type === 'FIREBASE_AUTH_SIGN_IN_GOOGLE') {
-    console.log('Received request to sign in with Google from offscreen document.');
+  // --- THIS IS THE CRITICAL CHANGE ---
+  // Listen for the 'initAuth' message from offscreen.js
+  if (data.initAuth) {
+    console.log('Received initAuth message from offscreen document. Triggering Google Sign-in...');
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const user = userCredential.user;
